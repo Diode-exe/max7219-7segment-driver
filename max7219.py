@@ -108,3 +108,15 @@ class SevenSegment:
     def power(self, on):
         """Toggle display power without clearing the buffer."""
         self._write(0x0C, 1 if on else 0)
+        
+    def brightness_fade_in(self, delay=0.5):
+        """Fade display in."""
+        for value in range(0, 15):
+            self._write(0x0A, value)
+            time.sleep(delay)
+            
+    def brightness_fade_out(self, delay=0.5):
+        """Fade display out."""
+        for value in range(15, 0, -1):
+            self._write(0x0A, value)
+            time.sleep(delay)

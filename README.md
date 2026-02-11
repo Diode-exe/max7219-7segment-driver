@@ -15,3 +15,7 @@ Driver for the 7 segment Maxwell MAX7219 7 segment display
 - ```scroll()``` scrolls a long string across the display
 
 - ```power()``` toggle display power without clearing the buffer
+
+- ```brightness_fade_out()``` fade screen out
+
+- ```brightness_fade_in()``` fade screen in
