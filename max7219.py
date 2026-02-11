@@ -102,3 +102,7 @@ class SevenSegment:
             self.text(full_msg[i:i+8])
             self.show()
             time.sleep(delay)
+
+    def power(self, on):
+        """Toggle display power without clearing the buffer."""
+        self._write(0x0C, 1 if on else 0)
