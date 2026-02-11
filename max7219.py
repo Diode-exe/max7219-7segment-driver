@@ -75,6 +75,10 @@ class SevenSegment:
             # Fill buffer from right to left (standard for these modules)
             self.buffer[7 - digit_index] = chars.get(char, 0x00)
             digit_index += 1
+            
+    def set_num(self, number):
+        """Set the display to show a number."""
+        self.text(str(number))
 
     def show(self):
         """Update the display with the current buffer content."""
