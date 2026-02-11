@@ -59,6 +59,7 @@ class SevenSegment:
             '"': 0b00100010, '#': 0b01111110, '$': 0b01101101, '%': 0b11010010,
             '&': 0b01000110, "'": 0b00100000, '(': 0b00101001, ')': 0b00001011,
             '*': 0b00100001, '+': 0b01110000, ',': 0b00010000, '/': 0b01010010,
+
         }
 
         digit_index = 0
@@ -75,7 +76,7 @@ class SevenSegment:
             # Fill buffer from right to left (standard for these modules)
             self.buffer[7 - digit_index] = chars.get(char, 0x00)
             digit_index += 1
-            
+
     def set_num(self, number):
         """Set the display to show a number."""
         self.text(str(number))
@@ -87,7 +88,6 @@ class SevenSegment:
 
     def brightness(self, value):
         """Set display brightness (0 to 15)."""
-        # Ensure the value stays within the hardware limits
         if value < 0:
             value = 0
         if value > 15:
@@ -112,19 +112,19 @@ class SevenSegment:
     def power(self, on):
         """Toggle display power without clearing the buffer."""
         self._write(0x0C, 1 if on else 0)
-        
+
     def brightness_fade_in(self, delay=0.5):
         """Fade display in."""
         for value in range(0, 15):
             self._write(0x0A, value)
             time.sleep(delay)
-            
+
     def brightness_fade_out(self, delay=0.5):
         """Fade display out."""
         for value in range(15, 0, -1):
             self._write(0x0A, value)
             time.sleep(delay)
-            
+
     def blink(self, times=3, delay=0.5):
         """Makes the display blink a specified number of times."""
         for each in range(times):
@@ -132,3 +132,32 @@ class SevenSegment:
             time.sleep(delay)
             self._write(0x0C, 1)
             time.sleep(delay)
+
+    def set_bar(self, length):
+        """Set a bar graph on the display with the specified length."""
+        self.text("_" * length)
+        self.show()
+
+    def rotate_segments(self, target_idx=0):
+        """Animate a single digit by writing patterns into the buffer.
+
+        This updates the internal `buffer` and calls `show()` so the
+        animation isn't immediately overwritten by other low-level writes.
+        By default this animates the rightmost digit (buffer index 0,
+        which maps to register 1). The original value is restored.
+        """
+        patterns = [
+            0b01000000, 0b00100000, 0b00010000, 0b00001000,
+            0b00000100, 0b00000010,
+        ]
+
+        # save and animate
+        orig = self.buffer[target_idx]
+        for p in patterns:
+            self.buffer[target_idx] = p
+            self.show()
+            time.sleep(0.15)
+
+        # restore original value
+        self.buffer[target_idx] = orig
+        self.show()
