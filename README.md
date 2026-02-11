@@ -21,3 +21,5 @@ Driver for the 7 segment Maxwell MAX7219 7 segment display
 - ```brightness_fade_in()``` fade screen in
 
 - ```set_num()``` set the display to show a number
+
+- ```blink()``` makes the display blink a specified number of times

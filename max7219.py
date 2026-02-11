@@ -124,3 +124,11 @@ class SevenSegment:
         for value in range(15, 0, -1):
             self._write(0x0A, value)
             time.sleep(delay)
+            
+    def blink(self, times=3, delay=0.5):
+        """Makes the display blink a specified number of times."""
+        for each in range(times):
+            self._write(0x0C, 0)
+            time.sleep(delay)
+            self._write(0x0C, 1)
+            time.sleep(delay)
