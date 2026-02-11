@@ -59,9 +59,20 @@ class SevenSegment:
             '*': 0b00100001, '+': 0b01110000, ',': 0b00010000, '/': 0b01010010,
         }
 
-        for i, char in enumerate(text[:8]):
+        digit_index = 0
+        for char in text:
+            if char == '.':
+                # Decimal points share the digit, so just flip its DP bit
+                if digit_index:
+                    self.buffer[7 - (digit_index - 1)] |= 0x80
+                continue
+
+            if digit_index >= 8:
+                break
+
             # Fill buffer from right to left (standard for these modules)
-            self.buffer[7-i] = chars.get(char, 0x00)
+            self.buffer[7 - digit_index] = chars.get(char, 0x00)
+            digit_index += 1
 
     def show(self):
         """Update the display with the current buffer content."""
