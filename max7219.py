@@ -93,7 +93,7 @@ class SevenSegment:
         self._write(0x0C, 0x01) # Ensure Shutdown Register is set to 'Normal'
         self._write(0x0A, value)
 
-    def scroll(self, message, delay=0.2):
+    def scroll(self, message, delay=0.2, wdt=None):
         """Scrolls a long string across the display."""
         # Add spaces so the message starts and ends off-screen
         padding = " " * 8
@@ -102,6 +102,8 @@ class SevenSegment:
             self.text(full_msg[i:i+8])
             self.show()
             time.sleep(delay)
+            if wdt:
+                wdt.feed()
 
     def power(self, on):
         """Toggle display power without clearing the buffer."""
