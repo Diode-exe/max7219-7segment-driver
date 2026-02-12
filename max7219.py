@@ -200,3 +200,13 @@ class SevenSegment:
                 self.show()
                 time.sleep(delay)
                 
+    def invert(self):
+        """Invert segments. Off will turn on and vice versa"""
+        # Flip all bits in each byte so segments invert properly.
+        for i, _ in enumerate(self.buffer):
+            self.buffer[i] = self.buffer[i] ^ 0xFF
+                
+    def print_buffer(self):
+        """print buffer to console"""
+        # Print as hex bytes for easier debugging (left-to-right display order)
+        print([hex(b) for b in self.buffer])

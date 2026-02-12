@@ -31,3 +31,7 @@ Driver for the 7 segment Maxwell MAX7219 7 segment display
 - ```set_char()``` sets a specific character at the given buffer index
 
 - ```bounce()``` bounce a short message back and forth across the display
+
+- ```invert()``` inverts the screen
+
+- ```print_buffer()``` prints the current buffer content to the console
