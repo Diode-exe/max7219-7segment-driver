@@ -35,3 +35,7 @@ Driver for the 7 segment Maxwell MAX7219 7 segment display
 - ```invert()``` inverts the screen
 
 - ```print_buffer()``` prints the current buffer content to the console
+
+- ```test_pattern()``` displays a test pattern of all eights with decimal points
+
+- ```marquee()``` scroll() but marquee instead

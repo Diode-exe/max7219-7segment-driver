@@ -210,3 +210,26 @@ class SevenSegment:
         """print buffer to console"""
         # Print as hex bytes for easier debugging (left-to-right display order)
         print([hex(b) for b in self.buffer])
+        
+    def test_pattern(self):
+        """Display a test pattern of all eights with decimal points."""
+        self.text("8.8.8.8.8.8.8.8.")
+        
+    def marquee(self, message, delay=0.2, wdt=None):
+        """Like scroll(), but a marquee instead"""
+        if not message:
+            return
+
+        # Create a padded string and duplicate it so an 8-char slice
+        # can wrap seamlessly from end->start.
+        pad = " " * 6
+        s = message + pad
+        doubled = s + s
+        i = 0
+        while True:
+            self.text(doubled[i:i+8])
+            self.show()
+            time.sleep(delay)
+            if wdt:
+                wdt.feed()
+            i = (i + 1) % len(s)
