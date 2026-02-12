@@ -27,3 +27,5 @@ Driver for the 7 segment Maxwell MAX7219 7 segment display
 - ```set_bar()``` turn on the bottom segments for a specified length
 
 - ```rotate_segments()``` creating a spinning wheel animation on specified char
+
+- ```set_char()``` sets a specific character at the given buffer index
