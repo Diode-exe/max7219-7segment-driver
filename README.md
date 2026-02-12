@@ -29,3 +29,5 @@ Driver for the 7 segment Maxwell MAX7219 7 segment display
 - ```rotate_segments()``` creating a spinning wheel animation on specified char
 
 - ```set_char()``` sets a specific character at the given buffer index
+
+- ```bounce()``` bounce a short message back and forth across the display

@@ -172,3 +172,31 @@ class SevenSegment:
         # Maintain same right-to-left mapping as `text()`
         self.buffer[7 - index] = pattern
         self.show()
+
+    def bounce(self, message, delay=0.2):
+        """Bounce a short message back and forth across the display.
+
+        If `message` is 8 characters or longer, fall back to `scroll()`.
+        """
+        if len(message) >= 8:
+            self.scroll(message, delay=delay)
+            return
+
+        padding = " " * (8 - len(message))
+        full = padding + message + padding
+        span = len(full) - 7
+
+        # forward and backward bounce
+        for _ in range(1):
+            # forward
+            for i in range(span):
+                self.text(full[i:i+8])
+                self.show()
+                time.sleep(delay)
+
+            # backward (skip endpoints to make a smooth bounce)
+            for i in range(span - 2, 0, -1):
+                self.text(full[i:i+8])
+                self.show()
+                time.sleep(delay)
+                
