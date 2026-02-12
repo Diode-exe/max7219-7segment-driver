@@ -165,7 +165,7 @@ class SevenSegment:
 
     def set_char(self, index, char):
         """Sets a specific character at the given buffer index."""
-        if not (0 <= index < 8):
+        if not 0 <= index < 8:
             return
 
         pattern = self.chars.get(char, 0x00)
