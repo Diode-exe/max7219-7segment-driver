@@ -39,3 +39,5 @@ Driver for the 7 segment Maxwell MAX7219 7 segment display
 - ```test_pattern()``` displays a test pattern of all eights with decimal points
 
 - ```marquee()``` scroll() but marquee instead
+
+- ```demo_mode()``` triggers a demo mode

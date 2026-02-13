@@ -1,5 +1,6 @@
 """module"""
 import time
+from machine import WDT
 
 class SevenSegment:
     """Class to control a seven-segment display using my custom MAX7219 driver."""
@@ -29,7 +30,7 @@ class SevenSegment:
         self.buffer = bytearray(8 * self.num)
         for i in range(8):
             self._write(i + 1, 0)
-            
+
     chars = {
         '0': 0b01111110, '1': 0b00110000, '2': 0b01101101, '3': 0b01111001,
         '4': 0b00110011, '5': 0b01011011, '6': 0b01011111, '7': 0b01110000,
@@ -55,6 +56,7 @@ class SevenSegment:
         '"': 0b00100010, '#': 0b01111110, '$': 0b01101101, '%': 0b11010010,
         '&': 0b01000110, "'": 0b00100000, '(': 0b00101001, ')': 0b00001011,
         '*': 0b00100001, '+': 0b01110000, ',': 0b00010000, '/': 0b01010010,
+        '°': 0b01100011,
 
     }
 
@@ -106,24 +108,27 @@ class SevenSegment:
         for i in range(len(full_msg) - 7):
             self.text(full_msg[i:i+8])
             self.show()
-            time.sleep(delay)
             if wdt:
                 wdt.feed()
+            time.sleep(delay)
 
     def power(self, on):
         """Toggle display power without clearing the buffer."""
         self._write(0x0C, 1 if on else 0)
 
-    def brightness_fade_in(self, delay=0.5):
+    def brightness_fade_in(self, delay=0.5, wdt=None):
         """Fade display in."""
         for value in range(0, 15):
             self._write(0x0A, value)
             time.sleep(delay)
-
-    def brightness_fade_out(self, delay=0.5):
+            if wdt:
+                wdt.feed()
+    def brightness_fade_out(self, delay=0.5, wdt=None):
         """Fade display out."""
         for value in range(15, 0, -1):
             self._write(0x0A, value)
+            if wdt:
+                wdt.feed()
             time.sleep(delay)
 
     def blink(self, times=3, delay=0.5):
@@ -139,7 +144,7 @@ class SevenSegment:
         self.text("_" * length)
         self.show()
 
-    def rotate_segments(self, target_idx=0):
+    def rotate_segments(self, target_idx=0, wdt=None):
         """Animate a single digit by writing patterns into the buffer.
 
         This updates the internal `buffer` and calls `show()` so the
@@ -157,6 +162,8 @@ class SevenSegment:
         for p in patterns:
             self.buffer[target_idx] = p
             self.show()
+            if wdt:
+                wdt.feed()
             time.sleep(0.15)
 
         # restore original value
@@ -173,13 +180,13 @@ class SevenSegment:
         self.buffer[7 - index] = pattern
         self.show()
 
-    def bounce(self, message, delay=0.2):
+    def bounce(self, message, delay=0.2, wdt=None):
         """Bounce a short message back and forth across the display.
 
         If `message` is 8 characters or longer, fall back to `scroll()`.
         """
         if len(message) >= 8:
-            self.scroll(message, delay=delay)
+            self.scroll(message, delay=delay, wdt=wdt)
             return
 
         padding = " " * (8 - len(message))
@@ -193,43 +200,175 @@ class SevenSegment:
                 self.text(full[i:i+8])
                 self.show()
                 time.sleep(delay)
+                if wdt:
+                    wdt.feed()
 
             # backward (skip endpoints to make a smooth bounce)
             for i in range(span - 2, 0, -1):
                 self.text(full[i:i+8])
                 self.show()
                 time.sleep(delay)
-                
-    def invert(self):
+                if wdt:
+                    wdt.feed()
+
+    def invert(self, wdt=None):
         """Invert segments. Off will turn on and vice versa"""
         # Flip all bits in each byte so segments invert properly.
         for i, _ in enumerate(self.buffer):
             self.buffer[i] = self.buffer[i] ^ 0xFF
-                
+            if wdt:
+                wdt.feed()
+
     def print_buffer(self):
         """print buffer to console"""
         # Print as hex bytes for easier debugging (left-to-right display order)
         print([hex(b) for b in self.buffer])
-        
+
     def test_pattern(self):
         """Display a test pattern of all eights with decimal points."""
         self.text("8.8.8.8.8.8.8.8.")
-        
+
     def marquee(self, message, delay=0.2, wdt=None):
-        """Like scroll(), but a marquee instead"""
+        """Like scroll(), but a marquee instead. Will go around 3 times per call"""
         if not message:
             return
 
         # Create a padded string and duplicate it so an 8-char slice
         # can wrap seamlessly from end->start.
-        pad = " " * 6
-        s = message + pad
-        doubled = s + s
-        i = 0
-        while True:
+        for _ in range(3):
+            pad = " " * 6
+            s = message + pad
+            doubled = s + s
+            i = 0
             self.text(doubled[i:i+8])
             self.show()
-            time.sleep(delay)
             if wdt:
                 wdt.feed()
+            time.sleep(delay)
             i = (i + 1) % len(s)
+
+    def demo(self):
+        """Demo mode"""
+        wdt = WDT()
+
+        self.text("DEMOMODE")
+        self.show()
+        wdt.feed()
+        time.sleep(1)
+        wdt.feed()
+        time.sleep(1)
+        wdt.feed()
+        time.sleep(1)
+
+
+        self.bounce(message="Bounce")
+        self.show()
+        self.bounce(message="Bounce")
+        self.show()
+        wdt.feed()
+        self.bounce(message="Bounce")
+        wdt.feed()
+
+        self.show()
+        self.scroll(message="Scroll", wdt=wdt)
+        self.show()
+        self.scroll(message="Scroll", wdt=wdt)
+        self.show()
+        self.scroll(message="Scroll", wdt=wdt)
+        self.show()
+
+        self.text("Fade out")
+        wdt.feed()
+        self.show()
+        self.brightness_fade_out(wdt=wdt)
+        self.show()
+        self.clear()
+        self.show()
+        self.text("Fade in")
+        wdt.feed()
+        self.show()
+        self.brightness_fade_in(wdt=wdt)
+        wdt.feed()
+        self.show()
+
+        # self.marquee(message="Marquee", wdt=wdt)
+        # wdt.feed()
+        # self.show()
+        # self.marquee(message="Marquee", wdt=wdt)
+        # wdt.feed()
+        # self.show()
+        # self.marquee(message="Marquee", wdt=wdt)
+        self.clear()
+        self.show()
+
+        self.text("BarGraph")
+        self.show()
+        wdt.feed()
+        time.sleep(1)
+        wdt.feed()
+        time.sleep(1)
+        wdt.feed()
+        self.clear()
+        self.show()
+        i = 0
+        for i in range(10):
+            self.set_bar(length=i)
+            self.show()
+            time.sleep(0.5)
+            if wdt:
+                wdt.feed()
+            i += 1
+        wdt.feed()
+        self.show()
+        time.sleep(1)
+        self.clear()
+
+        self.text("Rotate")
+        self.show()
+        wdt.feed()
+        time.sleep(1)
+        self.text("Segments")
+        self.show()
+        wdt.feed()
+        time.sleep(1)
+
+        self.clear()
+        self.show()
+        wdt.feed()
+        self.rotate_segments(wdt=wdt)
+        self.rotate_segments(wdt=wdt)
+        self.rotate_segments(wdt=wdt)
+        self.clear()
+        self.show()
+        time.sleep(1)
+
+        self.text("invert")
+        self.show()
+        wdt.feed()
+        time.sleep(1)
+        wdt.feed()
+        time.sleep(1)
+        wdt.feed()
+        time.sleep(1)
+        self.invert(wdt=wdt)
+        wdt.feed()
+        self.show()
+        time.sleep(1)
+        self.invert(wdt=wdt)
+        self.clear()
+        wdt.feed()
+        self.show()
+        time.sleep(1)
+        wdt.feed()
+        time.sleep(1)
+        wdt.feed()
+        self.text("Test pattern")
+        wdt.feed()
+        self.show()
+        time.sleep(1)
+        wdt.feed()
+        time.sleep(1)
+        wdt.feed()
+        self.test_pattern()
+        wdt.feed()
+        self.show()
