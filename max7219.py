@@ -372,3 +372,4 @@ class SevenSegment:
         self.test_pattern()
         wdt.feed()
         self.show()
+
